@@ -1,15 +1,17 @@
 // app/layout.tsx
 
 import type { Metadata } from "next";
-import "./globals.css"; // Ensure your global styles (especially Tailwind) are imported here
+import "./globals.css";
 
-// Recommended: Define your primary font here (e.g., Satoshi, Inter)
-// For simplicity, we'll assume a font is configured in your tailwind.config.js or globals.css
-// If using next/font, you would configure it here.
-
+// This is the brain of the fix.
+// We are explicitly telling Next.js where to find the icons.
 export const metadata: Metadata = {
   title: "Axis",
   description: "An invite-only collective for the world's most discerning creative professionals.",
+  icons: {
+    icon: "/icon.jpg", // The new, correct path to your icon in the 'public' folder.
+    apple: "/icon.jpg", // Also use this for Apple touch icons.
+  },
 };
 
 export default function RootLayout({
@@ -19,7 +21,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* This body tag contains everything */}
       <body className="bg-black">
         {children}
       </body>

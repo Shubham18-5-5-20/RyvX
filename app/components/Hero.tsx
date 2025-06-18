@@ -4,12 +4,10 @@
 
 import { motion } from 'framer-motion';
 
-// This interface clearly defines that the Hero component expects a function as a prop.
 interface HeroProps {
   onCtaClick: () => void;
 }
 
-// Animation variants for the fade-in effect.
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -17,13 +15,35 @@ const fadeIn = {
 
 const Hero = ({ onCtaClick }: HeroProps) => {
   return (
+    // We add `relative` here so we can position the new overlay.
     <section className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0 bg-black" />
-       <video key="/ink-background.mp4" className="absolute inset-0 h-full w-full object-cover" autoPlay loop muted playsInline >
-        <source src="/ink-background.mp4" type="video/mp4" />
+
+       <video 
+         key="/videos/ink-flow.mp4" 
+         className="absolute inset-0 h-full w-full object-cover" 
+         autoPlay 
+         loop 
+         muted 
+         playsInline 
+       >
+        <source src="/videos/ink-flow.mp4" type="video/mp4" />
       </video>
+
+      {/* This overlay improves general text readability. */}
       <div className="absolute inset-0 bg-black/60" />
 
+      {/* 
+        **THE DEFINITIVE FIX IS HERE**
+        This new div creates the fade-to-black effect at the bottom of the section.
+        - `absolute inset-0`: Makes it cover the entire section.
+        - `bg-gradient-to-t`: Creates a gradient that goes from bottom TO top.
+        - `from-black`: The gradient starts at the bottom with solid black.
+        - `to-transparent`: The gradient ends at the top, fully transparent.
+      */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
+
+      {/* The rest of your content remains exactly the same. */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-8 p-4 text-center">
         <motion.h1
           variants={fadeIn} initial="initial" animate="animate"
@@ -33,8 +53,6 @@ const Hero = ({ onCtaClick }: HeroProps) => {
           WHERE TASTE IS THE ONLY METRIC.
         </motion.h1>
 
-        {/* ** THE FIX IS HERE ** */}
-        {/* We have replaced the ' in "world's" with the HTML entity `'` */}
         <motion.p
           variants={fadeIn} initial="initial" animate="animate"
           transition={{ duration: 0.8, delay: 0.4 }}
