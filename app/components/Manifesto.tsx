@@ -33,7 +33,7 @@ const Manifesto = ({ paragraphs = DEFAULT_PARAGRAPHS }: ManifestoProps) => {
         // THE FIX FOR #1: Re-trigger animation on every view
         // 'once: false' ensures the animation runs every time the element enters the viewport.
         // 'amount: 0.5' means it triggers when the center of the element is visible.
-        viewport={{ once: false, amount: 0.5 }}
+        viewport={{ once: true, amount: 0.5 }}
         
         // THE FIX FOR #2: Slower, more graceful animation
         // Increased duration from 1.0 to 1.8 seconds for a more deliberate feel.
