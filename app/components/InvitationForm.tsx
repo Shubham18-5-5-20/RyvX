@@ -6,28 +6,33 @@ import { forwardRef, useState } from 'react';
 import { motion, AnimatePresence, type Transition } from 'framer-motion';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
-// The props interface for this component.
+// Defines the props this component can accept. This solves the "empty interface" error.
 interface InvitationFormProps {
   title?: string;
   waitlistText?: string;
 }
 
-// Explicitly typed Transition object to satisfy TypeScript.
+// Explicitly typed transition object to satisfy TypeScript's strict checks.
 const itemTransition: Transition = { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] };
 
-// Variants defining state for child animations.
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0 },
-};
-
-// Variants for the parent container to orchestrate staggered animations.
+// All variants are structured correctly to avoid type errors.
+const itemVariants = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.2, delayChildren: 0.1 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 } },
+};
+
+const isFormspreeError = (err: unknown): err is { errors: Array<{ message: string }> } => {
+  // First, confirm it's a non-null object
+  if (typeof err !== 'object' || err === null) {
+    return false;
+  }
+  // Next, safely check if an 'errors' property exists on it
+  if (!('errors' in err)) {
+    return false;
+  }
+  // Finally, confirm that the 'errors' property is an array
+  return Array.isArray((err as { errors: unknown }).errors);
 };
 
 const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
@@ -39,51 +44,53 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
   const [portfolioUrl, setPortfolioUrl] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Handles the first stage of submission (email only).
   const handleEmailSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!email) return;
     setFormStage('awaitingPortfolio');
   };
 
-  // Handles the final submission, sending all data to Formspree.
   const handleFinalSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!portfolioUrl || formStage === 'submitting') return;
     setFormStage('submitting');
+    setErrorMsg('');
 
-    const formData = {
-      email,
-      portfolio: portfolioUrl,
-    };
+    const formData = { email, portfolio: portfolioUrl };
 
     try {
       const response = await fetch('https://formspree.io/f/xldnlvyr', { // <-- **PASTE YOUR FORMSPREE URL HERE**
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Formspree submission failed.');
+        // If the server returns an error, we read its response body.
+        const errorData = await response.json();
+        // We throw this data so it can be caught and analyzed below.
+        throw errorData;
       }
 
       setFormStage('success');
-    } catch (err) {
-      // Correctly uses the `err` variable to fix the ESLint warning.
-      console.error("Submission error:", err);
-      setErrorMsg('Submission failed. Please try again later.');
+    } catch (err: unknown) {
+      // **This robust error handling is the key fix.**
+      // 1. It prints the full error object from Formspree into your console for debugging.
+      console.error("FORMSPREE ERROR:", err);
+
+      // 2. It creates a user-friendly message. If Formspree provides a detailed reason, we use it.
+       if (isFormspreeError(err)) {
+        const message = err.errors.map(e => e.message).join(', ');
+        setErrorMsg(message);
+      } else {
+        setErrorMsg('An unexpected error occurred. Please try again.');
+      }
       setFormStage('error');
     }
   };
-
   const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (formStage === 'error') {
-      setFormStage('awaitingPortfolio');
-      setErrorMsg('');
-    }
+    if (formStage === 'error') setFormStage('awaitingPortfolio');
     setPortfolioUrl(e.target.value);
   };
   
@@ -115,14 +122,11 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
             {formStage === 'success' ? (
               <motion.div
                 key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center"
               >
-                <div className="flex flex-col items-center justify-center">
-                    <CheckCircle className="h-12 w-12 text-amber-400" />
-                    <p className="mt-4 text-2xl font-medium text-amber-400">YOUR REQUEST IS PENDING VETTING.</p>
-                </div>
+                <CheckCircle className="h-12 w-12 text-amber-400" />
+                <p className="mt-4 text-2xl font-medium text-amber-400">YOUR REQUEST IS PENDING VETTING.</p>
               </motion.div>
             ) : (
               <motion.div key="form" className="w-full">
@@ -144,7 +148,7 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
                         <p className="mb-2 text-sm text-gray-400">One last step...</p>
                         <input
                           type="url" value={portfolioUrl} onChange={handlePortfolioChange} required placeholder="Link to your portfolio or best work"
-                          className={`w-full rounded-md border-0 bg-white/5 py-3 px-4 text-white ring-1 ring-inset transition-all duration-300 placeholder:text-gray-500 focus:ring-amber-400 ${formStage === 'error' ? 'ring-red-500' : 'ring-white/10'}`}
+                          className={`w-full rounded-md border-0 bg-white/5 py-3 px-4 text-white ring-1 ring-inset transition-all duration-300 placeholder:text-gray-500 focus:ring-amber-400 ${formStage === 'error' ? 'ring-red-500/80 focus:ring-red-500' : 'ring-white/10'}`}
                         />
                       </motion.div>
                     )}
@@ -152,11 +156,11 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
                   <div className="pt-2">
                     <AnimatePresence mode="wait">
                       {formStage === 'awaitingEmail' ? (
-                         <motion.button key="emailBtn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} type="submit"
+                         <motion.button key="emailBtn" type="submit"
                            className="w-full rounded-md bg-white px-5 py-3 text-sm font-semibold text-black transition-colors duration-300 hover:bg-amber-400"
                          >Request My Invite</motion.button>
                       ) : (
-                        <motion.button key="portfolioBtn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} type="submit" disabled={formStage === 'submitting'}
+                        <motion.button key="portfolioBtn" type="submit" disabled={formStage === 'submitting'}
                           className="w-full rounded-md bg-amber-500 px-5 py-3 text-sm font-semibold text-black transition-colors duration-300 hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-gray-600"
                         >{formStage === 'submitting' ? 'Submitting...' : 'Submit Portfolio'}</motion.button>
                       )}
