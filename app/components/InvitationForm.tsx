@@ -57,7 +57,7 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
     const formData = { email, portfolio: portfolioUrl };
 
     try {
-      const response = await fetch('https://formspree.io/f/xldnlvyr', { // <-- **PASTE YOUR FORMSPREE URL HERE**
+      const response = await fetch('https://formspree.io/f/mnnvzyqo', { // <-- **PASTE YOUR FORMSPREE URL HERE**
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
