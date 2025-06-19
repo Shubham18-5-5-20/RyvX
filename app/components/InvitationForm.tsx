@@ -6,21 +6,30 @@ import { forwardRef, useState } from 'react';
 import { motion, AnimatePresence, type Transition } from 'framer-motion';
 import { CheckCircle, AlertTriangle } from 'lucide-react';
 
-// FIX #1: Define a REAL interface for the component's props.
-// This gives it a specific shape and satisfies the linter rule.
+// The props interface for this component.
 interface InvitationFormProps {
   title?: string;
   waitlistText?: string;
 }
 
+// Explicitly typed Transition object to satisfy TypeScript.
 const itemTransition: Transition = { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] };
-const itemVariants = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 } },
+
+// Variants defining state for child animations.
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
 };
 
-// FIX #2: Use the new, non-empty interface as the type for the props.
+// Variants for the parent container to orchestrate staggered animations.
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.2, delayChildren: 0.1 },
+  },
+};
+
 const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
   title = "Phase I: The Post-Production Guild",
   waitlistText = "Is your craft outside of post-production? Join the waitlist.",
@@ -30,28 +39,51 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
   const [portfolioUrl, setPortfolioUrl] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Handles the first stage of submission (email only).
   const handleEmailSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!email) return;
     setFormStage('awaitingPortfolio');
   };
 
+  // Handles the final submission, sending all data to Formspree.
   const handleFinalSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!portfolioUrl) return;
+    if (!portfolioUrl || formStage === 'submitting') return;
     setFormStage('submitting');
+
+    const formData = {
+      email,
+      portfolio: portfolioUrl,
+    };
+
     try {
-      await new Promise(res => setTimeout(res, 1500));
+      const response = await fetch('https://formspree.io/f/xxxxxxxx', { // <-- **PASTE YOUR FORMSPREE URL HERE**
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Formspree submission failed.');
+      }
+
       setFormStage('success');
     } catch (err) {
-      console.error("Final submission failed:", err);
-      setErrorMsg('Submission failed. Please try again.');
+      // Correctly uses the `err` variable to fix the ESLint warning.
+      console.error("Submission error:", err);
+      setErrorMsg('Submission failed. Please try again later.');
       setFormStage('error');
     }
   };
 
   const handlePortfolioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (formStage === 'error') setFormStage('awaitingPortfolio');
+    if (formStage === 'error') {
+      setFormStage('awaitingPortfolio');
+      setErrorMsg('');
+    }
     setPortfolioUrl(e.target.value);
   };
   
@@ -81,10 +113,15 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
         >
           <AnimatePresence mode="wait">
             {formStage === 'success' ? (
-              <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
                 <div className="flex flex-col items-center justify-center">
-                  <CheckCircle className="h-12 w-12 text-amber-400" />
-                  <p className="mt-4 text-2xl font-medium text-amber-400">YOUR REQUEST IS PENDING VETTING.</p>
+                    <CheckCircle className="h-12 w-12 text-amber-400" />
+                    <p className="mt-4 text-2xl font-medium text-amber-400">YOUR REQUEST IS PENDING VETTING.</p>
                 </div>
               </motion.div>
             ) : (
@@ -101,7 +138,6 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
                       className="w-full rounded-md border-0 bg-white/5 py-3 px-4 text-white ring-1 ring-inset transition-all duration-300 placeholder:text-gray-500 focus:ring-amber-400 disabled:opacity-50"
                     />
                   </div>
-
                   <AnimatePresence>
                     {formStage !== 'awaitingEmail' && (
                       <motion.div initial={{ opacity: 0, y: -20, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }} exit={{ opacity: 0, y: -20, height: 0 }} transition={{ duration: 0.5, ease: 'easeInOut' }} className="overflow-hidden">
@@ -113,7 +149,6 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
                       </motion.div>
                     )}
                   </AnimatePresence>
-
                   <div className="pt-2">
                     <AnimatePresence mode="wait">
                       {formStage === 'awaitingEmail' ? (
@@ -127,7 +162,6 @@ const InvitationForm = forwardRef<HTMLDivElement, InvitationFormProps>(({
                       )}
                     </AnimatePresence>
                   </div>
-
                   {errorMsg && (
                     <div className="mt-3 flex items-center justify-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-red-500" />
