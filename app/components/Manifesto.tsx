@@ -18,7 +18,7 @@ const focusVariants = {
 
 const DEFAULT_PARAGRAPHS = [
     "The modern internet has turned craftsmanship into a commodity. Platforms reward volume over quality, creating a race to the bottom that is an insult to the true artist.",
-    "Axis is the antidote. We are a private, vetted ecosystem where your work speaks for itself. A guild hall built for the masters of the craft, not a flea market for amateurs."
+    "RyvX is the antidote. We are a private, vetted ecosystem where your work speaks for itself. A guild hall built for the masters of the craft, not a flea market for amateurs."
 ];
 
 const Manifesto = ({ paragraphs = DEFAULT_PARAGRAPHS }: ManifestoProps) => {

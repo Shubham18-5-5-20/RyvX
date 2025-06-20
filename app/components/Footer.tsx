@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="border-t border-zinc-800 pt-8 flex flex-col-reverse items-center gap-y-6 sm:flex-row sm:justify-between">
           
           <p className="text-sm leading-5 text-zinc-500">
-            © {new Date().getFullYear()} Axis. Built on principle.
+            © {new Date().getFullYear()} RyvX. Built on principle.
           </p>
 
           <div className="flex items-center space-x-6">

@@ -6,7 +6,7 @@ import "./globals.css";
 // This is the brain of the fix.
 // We are explicitly telling Next.js where to find the icons.
 export const metadata: Metadata = {
-  title: "Axis",
+  title: "RyvX",
   description: "An invite-only collective for the world's most discerning creative professionals.",
   icons: {
     icon: "/icon.jpg", // The new, correct path to your icon in the 'public' folder.
