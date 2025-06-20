@@ -1,6 +1,7 @@
 // app/layout.tsx
 
 import type { Metadata } from "next";
+import Header from "./components/Header";
 import "./globals.css";
 
 // This is the brain of the fix.
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black">
+        <Header />
         {children}
       </body>
     </html>
