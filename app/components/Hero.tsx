@@ -32,15 +32,7 @@ const Hero = ({ onCtaClick }: HeroProps) => {
 
       {/* This overlay improves general text readability. */}
       <div className="absolute inset-0 bg-black/60" />
-
-      {/* 
-        **THE DEFINITIVE FIX IS HERE**
-        This new div creates the fade-to-black effect at the bottom of the section.
-        - `absolute inset-0`: Makes it cover the entire section.
-        - `bg-gradient-to-t`: Creates a gradient that goes from bottom TO top.
-        - `from-black`: The gradient starts at the bottom with solid black.
-        - `to-transparent`: The gradient ends at the top, fully transparent.
-      */}
+      
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
 
       {/* The rest of your content remains exactly the same. */}
@@ -58,7 +50,7 @@ const Hero = ({ onCtaClick }: HeroProps) => {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="max-w-3xl text-lg text-gray-200"
         >
-          An invite-only collective for the world&apos;s most discerning creative professionals.
+          The Curated Home for Top-Tier Video Editors. Zero Commission. Maximum Impact.
         </motion.p>
         
         <motion.div
