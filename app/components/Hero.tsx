@@ -40,8 +40,6 @@ const Hero = ({ onCtaClick }: HeroProps) => {
   useEffect(() => {
     const controls = animate(count, headlineText.length, {
       type: "tween",
-      // --- SPEED ADJUSTMENT ---
-      // Changed from 4 to 2.5 for a faster effect.
       duration: 2.5, 
       ease: "linear",
       onComplete: () => {
@@ -49,7 +47,12 @@ const Hero = ({ onCtaClick }: HeroProps) => {
       }
     });
     return controls.stop;
-  }, []); // The empty dependency array ensures this runs only once.
+    
+    // FIX: We are intentionally telling the linter to ignore this line.
+    // We know we only want this animation to run once, and adding the
+    // dependencies (`count`, `secondaryControls`) would cause an infinite loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
 
   return (
