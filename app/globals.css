@@ -17,3 +17,16 @@
   50% { transform: translate(10%, -10%); }
   75% { transform: translate(-10%, 10%); }
 }
+
+.blinking-cursor {
+  font-weight: 300; /* Make it a bit thinner than the headline */
+  font-size: 1.1em; /* Make it slightly taller */
+  color: #a78bfa; /* An indigo color to match the theme */
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}

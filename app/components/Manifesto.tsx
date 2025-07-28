@@ -2,54 +2,108 @@
 
 "use client";
 
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 
-interface ManifestoProps {
-  paragraphs?: string[];
-}
+// --- DATA & HELPER COMPONENTS (No changes here) ---
 
-// The variants define the start and end states of the animation.
-// 'hidden' is how it looks off-screen.
-// 'visible' is how it looks on-screen.
-const focusVariants = {
-  hidden: { opacity: 0, filter: 'blur(10px)', y: 20 },
-  visible: { opacity: 1, filter: 'blur(0px)', y: 0 },
-};
-
-const DEFAULT_PARAGRAPHS = [
-    "The modern internet has turned craftsmanship into a commodity. Platforms reward volume over quality, creating a race to the bottom that is an insult to the true artist.",
-    "RyvX is the antidote. We are a private, vetted ecosystem where your work speaks for itself. A guild hall built for the masters of the craft, not a flea market for amateurs."
+const manifestoText = [
+  "Our industry has become a factory. A race to the bottom where speed is valued over substance, and algorithms dictate taste.",
+  "We believe in a different path. A return to the principles of true craftsmanship, where the artist is empowered, not commoditized.",
+  "RyvX is our declaration. It is a curated ecosystem built on trust, peer-to-peer respect, and an unwavering focus on the craft itself.",
+  "This is not another marketplace. This is a guild hall for the digital age."
 ];
 
-const Manifesto = ({ paragraphs = DEFAULT_PARAGRAPHS }: ManifestoProps) => {
+interface WordProps {
+  children: React.ReactNode;
+  progress: MotionValue<number>;
+  range: [number, number];
+}
+
+const Word = ({ children, progress, range }: WordProps) => {
+  const opacity = useTransform(progress, range, [0.2, 1]);
   return (
-    // This container creates the "empty space" with its height and black background.
-    <section className="flex min-h-screen items-center bg-black py-24 sm:py-32">
-      <motion.div
-        className="mx-auto max-w-3xl px-6"
-        variants={focusVariants}
-        initial="hidden"
-        whileInView="visible"
-        // THE FIX FOR #1: Re-trigger animation on every view
-        // 'once: false' ensures the animation runs every time the element enters the viewport.
-        // 'amount: 0.5' means it triggers when the center of the element is visible.
-        viewport={{ once: true, amount: 0.5 }}
-        
-        // THE FIX FOR #2: Slower, more graceful animation
-        // Increased duration from 1.0 to 1.8 seconds for a more deliberate feel.
-        transition={{ duration: 1.8, ease: [0.25, 1, 0.5, 1] }}
-      >
-        <div className="space-y-12">
-          {paragraphs.map((paragraphText, index) => (
-            <p
-              key={index}
-              className="text-center text-2xl font-medium leading-relaxed text-gray-200 md:text-3xl"
-            >
-              {paragraphText}
-            </p>
-          ))}
+    <motion.span className="text-gray-300 transition-opacity duration-200" style={{ opacity }}>
+      {children}
+    </motion.span>
+  );
+};
+
+const Paragraph = ({ text }: { text: string }) => {
+  const element = useRef<HTMLParagraphElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: element,
+    offset: ['start 0.9', 'start 0.1']
+  });
+  const words = text.split(" ");
+  return (
+    <p ref={element} className="text-3xl lg:text-4xl max-w-2xl font-medium leading-relaxed">
+      {words.map((word, i) => {
+        const start = i / words.length;
+        const end = start + (1 / words.length);
+        return <Word key={i} progress={scrollYProgress} range={[start, end]}>{word + " "}</Word>;
+      })}
+    </p>
+  );
+};
+
+
+// --- MAIN MANIFESTO COMPONENT (Updated with new layout and animation logic) ---
+const Manifesto = () => {
+  // 1. Create a ref for the main section container.
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // 2. Track the scroll progress of the entire section.
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'] // Track from the moment the top hits the top, to when the bottom hits the bottom.
+  });
+
+  // 3. Map the scroll progress to a rotation value for our 3D graphic.
+  // As we scroll through the whole section, the cube will rotate 360 degrees on the Y-axis.
+  const rotateY = useTransform(scrollYProgress, [0, 1], [0, 360]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [0, -360]);
+
+
+  return (
+    <section ref={containerRef} className="bg-black text-white py-24 md:py-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* We now use a two-column layout */}
+        <div className="flex flex-col md:flex-row md:space-x-12">
+          
+          {/* Left Column: The scrolling text */}
+          <div className="md:w-3/5">
+            <div className="flex flex-col space-y-32">
+              {manifestoText.map((paragraph, index) => (
+                <Paragraph key={index} text={paragraph} />
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: The pinned visual */}
+          <div className="md:w-2/5 h-screen -mt-24">
+            {/* The 'sticky' class is what pins this element to the top of the screen */}
+            <div className="sticky top-0 h-full flex items-center justify-center">
+              <motion.div 
+                className="w-48 h-48 lg:w-64 lg:h-64"
+                style={{
+                  perspective: 800, // Adds depth to the 3D rotation
+                }}
+              >
+                {/* This is our visual element, the rotating cube. */}
+                <motion.div
+                  className="w-full h-full bg-indigo-900/20 border border-indigo-500/50"
+                  style={{
+                    rotateY,
+                    rotateX,
+                  }}
+                />
+              </motion.div>
+            </div>
+          </div>
+
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };

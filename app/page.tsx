@@ -1,16 +1,18 @@
 // app/page.tsx
-"use client";
+
+"use client"; 
 
 import { useRef } from 'react';
 import Hero from "./components/Hero";
 import FoundingMembers from './components/FoundingMembers';
-import Manifesto from "./components/Manifesto";
-import Principles from "./components/Principles";
+// Import the new unified component
+import ManifestoWithPrinciples from "./components/ManifestoWithPrinciples";
 import Footer from "./components/Footer";
 
 export default function HomePage() {
-  // The ref is now typed to point to a generic HTMLElement, which is safer.
-  const waitlistSectionRef = useRef<HTMLElement>(null);
+  // FIX: The ref is now specifically typed to an HTMLDivElement.
+  // This exactly matches the type of the <div> it will be attached to.
+  const waitlistSectionRef = useRef<HTMLDivElement>(null);
 
   const handleScrollToWaitlist = () => {
     waitlistSectionRef.current?.scrollIntoView({
@@ -23,14 +25,13 @@ export default function HomePage() {
     <main className="bg-black">
       <Hero onCtaClick={handleScrollToWaitlist} />
 
-      {/* 
-        FIX: The ref is now passed directly to the component.
-        This is cleaner and the correct TypeScript/React pattern.
-      */}
-      <FoundingMembers ref={waitlistSectionRef} />
+      {/* This ref now correctly matches the type of the <div> */}
+      <div ref={waitlistSectionRef}>
+        <FoundingMembers />
+      </div>
 
-      <Manifesto />
-      <Principles />
+      <ManifestoWithPrinciples />
+      
       <Footer />
     </main>
   );
