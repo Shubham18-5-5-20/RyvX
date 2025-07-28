@@ -1,43 +1,36 @@
 // app/page.tsx
-
-"use client"; // This must be a Client Component to use hooks.
+"use client";
 
 import { useRef } from 'react';
 import Hero from "./components/Hero";
 import FoundingMembers from './components/FoundingMembers';
 import Manifesto from "./components/Manifesto";
 import Principles from "./components/Principles";
-import InvitationForm from "./components/InvitationForm";
 import Footer from "./components/Footer";
 
 export default function HomePage() {
-  // 1. Create a ref. This is like a handle to a specific DOM element.
-  const formRef = useRef<HTMLDivElement>(null);
+  // The ref is now typed to point to a generic HTMLElement, which is safer.
+  const waitlistSectionRef = useRef<HTMLElement>(null);
 
-  // 2. Create the handler function that performs the actual smooth scroll.
-  const handleScrollToForm = () => {
-    // This command tells the browser to scroll the element attached to 'formRef' into view smoothly.
-    formRef.current?.scrollIntoView({
+  const handleScrollToWaitlist = () => {
+    waitlistSectionRef.current?.scrollIntoView({
       behavior: 'smooth',
-      block: 'start', // Aligns the top of the form with the top of the screen.
+      block: 'start',
     });
   };
 
   return (
     <main className="bg-black">
-      {/* 3. The Hero component receives the scroll function as a prop. */}
-      <Hero onCtaClick={handleScrollToForm} />
+      <Hero onCtaClick={handleScrollToWaitlist} />
 
-      <FoundingMembers />
+      {/* 
+        FIX: The ref is now passed directly to the component.
+        This is cleaner and the correct TypeScript/React pattern.
+      */}
+      <FoundingMembers ref={waitlistSectionRef} />
 
-      {/* The other sections require no changes. */}
       <Manifesto />
       <Principles />
-
-      {/* 4. The InvitationForm component receives the ref itself. */}
-      {/* This assumes your InvitationForm.tsx is wrapped in 'forwardRef'. */}
-      <InvitationForm ref={formRef} />
-      
       <Footer />
     </main>
   );

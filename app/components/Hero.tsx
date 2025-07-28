@@ -4,18 +4,22 @@
 
 import { motion } from 'framer-motion';
 
+// 1. Define an interface for the props the Hero component will accept.
+// This tells TypeScript that 'onCtaClick' is a function that takes no arguments and returns void.
 interface HeroProps {
   onCtaClick: () => void;
 }
 
+// Animation variants remain the same
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
 };
 
+// 2. Apply the HeroProps interface to your component's props.
+// This makes TypeScript aware of the 'onCtaClick' prop.
 const Hero = ({ onCtaClick }: HeroProps) => {
   return (
-    // We add `relative` here so we can position the new overlay.
     <section className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0 bg-black" />
 
@@ -30,12 +34,9 @@ const Hero = ({ onCtaClick }: HeroProps) => {
         <source src="/videos/video-editing.mp4" type="video/mp4" />
       </video>
 
-      {/* This overlay improves general text readability. */}
       <div className="absolute inset-0 bg-black/60" />
-      
       <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
 
-      {/* The rest of your content remains exactly the same. */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center space-y-8 p-4 text-center">
         <motion.h1
           variants={fadeIn} initial="initial" animate="animate"
@@ -57,6 +58,7 @@ const Hero = ({ onCtaClick }: HeroProps) => {
           variants={fadeIn} initial="initial" animate="animate"
           transition={{ duration: 0.8, delay: 0.6 }}
         >
+          {/* 3. This onClick handler now correctly uses the passed-in prop. */}
           <motion.button
             onClick={onCtaClick}
             whileHover={{ scale: 1.05 }}

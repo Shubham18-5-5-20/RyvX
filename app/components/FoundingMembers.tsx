@@ -1,14 +1,24 @@
 // components/FoundingMembers.tsx
-"use client"; // Ensures this is a Client Component for hooks and event listeners
 
-import React from 'react';
-// Import motion AND the Variants type from framer-motion
+"use client";
+
+// Import 'forwardRef' to allow this component to receive a ref
+import React, { forwardRef, useState, useEffect } from 'react';
+
+// Import motion and the Variants type for TypeScript
 import { motion, Variants } from 'framer-motion';
-import { FoundingMemberIncentive } from '@/types/foundingMembers'; // Adjust path as needed
 
-// This function can remain outside the component
+// Define the type for an incentive.
+// In a real app, this might live in a separate `types.ts` file.
+export interface FoundingMemberIncentive {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+// Simulate fetching data (in a real app, this would be an API call)
 async function getFoundingMemberIncentives(): Promise<FoundingMemberIncentive[]> {
-  // ... (data is the same)
   return [
     {
       id: '1',
@@ -43,7 +53,8 @@ async function getFoundingMemberIncentives(): Promise<FoundingMemberIncentive[]>
   ];
 }
 
-// FIX: Add the ': Variants' type annotation to each variants object.
+// --- Animation Variants with explicit TypeScript types ---
+
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -110,17 +121,22 @@ const ctaVariants: Variants = {
   },
 };
 
-const FoundingMembers: React.FC = () => {
-  // Because this is now a client component, we fetch data using state and effects.
-  const [incentives, setIncentives] = React.useState<FoundingMemberIncentive[]>([]);
+// --- Component Definition ---
 
-  React.useEffect(() => {
-    // Fetch the data on the client side when the component mounts
-    getFoundingMemberIncentives().then(data => setIncentives(data));
+// We wrap the component in `forwardRef` to accept a `ref` from its parent.
+// The ref is typed as being attached to a generic HTML element (like <section> or <div>).
+const FoundingMembers = forwardRef<HTMLElement>((props, ref) => {
+  const [incentives, setIncentives] = useState<FoundingMemberIncentive[]>([]);
+
+  // Fetch data on the client-side when the component mounts.
+  useEffect(() => {
+    getFoundingMemberIncentives().then(setIncentives);
   }, []);
 
   return (
-    <section className="bg-gray-50 py-16 md:py-24 overflow-hidden" id="founding-100">
+    // The `ref` is attached to the main <section> element. This is the element
+    // that will be scrolled into view.
+    <section ref={ref} className="bg-gray-50 py-16 md:py-24 overflow-hidden" id="founding-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="text-center mb-12">
           <motion.h2
@@ -177,10 +193,10 @@ const FoundingMembers: React.FC = () => {
             whileInView="show"
             viewport={{ once: true, amount: 0.5 }}
           >
-            Ready to be a part of the exclusive cohort that sets the standard for quality and transparency?
+            Ready to be a part of the exclusive cohort that sets the standard?
           </motion.p>
           <motion.a
-            href="/join-waitlist"
+            href="/join-waitlist" // This button navigates to the waitlist page
             className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
             variants={ctaVariants}
             initial="hidden"
@@ -215,6 +231,9 @@ const FoundingMembers: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+// Add a displayName for better debugging in React DevTools
+FoundingMembers.displayName = 'FoundingMembers';
 
 export default FoundingMembers;
