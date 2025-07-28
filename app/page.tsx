@@ -4,6 +4,7 @@
 
 import { useRef } from 'react';
 import Hero from "./components/Hero";
+import FoundingMembers from './components/FoundingMembers';
 import Manifesto from "./components/Manifesto";
 import Principles from "./components/Principles";
 import InvitationForm from "./components/InvitationForm";
@@ -26,6 +27,8 @@ export default function HomePage() {
     <main className="bg-black">
       {/* 3. The Hero component receives the scroll function as a prop. */}
       <Hero onCtaClick={handleScrollToForm} />
+
+      <FoundingMembers />
 
       {/* The other sections require no changes. */}
       <Manifesto />

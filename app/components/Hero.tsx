@@ -20,14 +20,14 @@ const Hero = ({ onCtaClick }: HeroProps) => {
       <div className="absolute inset-0 bg-black" />
 
        <video 
-         key="/videos/ink-flow.mp4" 
+         key="/videos/video-editing.mp4" 
          className="absolute inset-0 h-full w-full object-cover" 
          autoPlay 
          loop 
          muted 
          playsInline 
        >
-        <source src="/videos/ink-flow.mp4" type="video/mp4" />
+        <source src="/videos/video-editing.mp4" type="video/mp4" />
       </video>
 
       {/* This overlay improves general text readability. */}
